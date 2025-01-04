@@ -1,0 +1,30 @@
+﻿@model projekt.Models.ApplicationUser
+
+<h2>Usuń użytkownika</h2>
+
+<div class="form-group">
+    <label><strong>First Name:</strong></label>
+    <p>@Model.FirstName</p>
+</div>
+<div class="form-group">
+    <label><strong>Last Name:</strong></label>
+    <p>@Model.LastName</p>
+</div>
+<div class="form-group">
+    <label><strong>Email:</strong></label>
+    <p>@Model.Email</p>
+</div>
+<div class="form-group">
+    <label><strong>Username:</strong></label>
+    <p>@Model.UserName</p>
+</div>
+<div class="form-group">
+    <label><strong>Role:</strong></label>
+    <p>@Model.Role</p>
+</div>
+
+<form asp-action="Delete">
+    <input type="hidden" asp-for="Id" />
+    <input type="submit" value="Delete" class="btn btn-danger" /> |
+    <a asp-action="Index">Back to List</a>
+</form>

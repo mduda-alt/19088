@@ -3,12 +3,13 @@
     public class Borrow
     {
         public int BorrowId { get; set; }
-        public int BookId { get; set; }
-        public Book Book { get; set; } // Relacja z książką
-        public int UserId { get; set; }
-        public User User { get; set; } // Relacja z użytkownikiem
-        public DateTime BorrowDate { get; set; }
-        public DateTime? ReturnDate { get; set; }
-    }
 
+        public int BookId { get; set; }
+        public Book Book { get; set; }
+
+        public string UserId { get; set; } // Klucz obcy
+        public ApplicationUser User { get; set; }
+
+        public DateTime BorrowDate { get; set; }
+    }
 }

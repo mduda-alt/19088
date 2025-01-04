@@ -1,54 +1,64 @@
 ﻿@model projekt.Models.Book
 
-@{
-    ViewData["Title"] = "Details";
-}
+<h2>Book Details</h2>
 
-<h1>Details</h1>
+<div class="mb-3">
+    @if (User.IsInRole("Admin"))
+    {
+        <a asp-action="Create" class="btn btn-primary">Create New</a>
+    }
+</div>
 
 <div>
-    <h4>Book</h4>
-    <hr />
+    <h4>@Model.Title</h4>
     <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Title)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Title)
+        <dt class="col-sm-2">Author</dt>
+        <dd class="col-sm-10">@Model.Author</dd>
+
+        <dt class="col-sm-2">ISBN</dt>
+        <dd class="col-sm-10">@Model.ISBN</dd>
+
+        <dt class="col-sm-2">Published Date</dt>
+        <dd class="col-sm-10">@Model.PublishedDate.ToShortDateString()</dd>
+
+        <dt class="col-sm-2">Short Description</dt>
+        <dd class="col-sm-10">@Model.ShortDescription</dd>
+
+        <dt class="col-sm-2">Status</dt>
+        <dd class="col-sm-10">@Model.Status</dd>
+
         </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Author)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Author)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ISBN)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ISBN)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.PublishedDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.PublishedDate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Status)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Status)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Category)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Category.CategoryId)
-        </dd>
+        @if (Model.Status == "Borrowed")
+        {
+            <dt class="col-sm-2">
+                Borrowed Date
+            </dt>
+            <dd class="col-sm-10">
+                @Model.BorrowDate?.ToString("yyyy-MM-dd")
+            </dd>
+        }
+
+        <dt class="col-sm-2">Category</dt>
+        <dd class="col-sm-10">@Model.Category?.Name</dd>
     </dl>
 </div>
+
 <div>
-    <a asp-action="Edit" asp-route-id="@Model?.BookId">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+    @if (User.IsInRole("Reader") || User.IsInRole("Admin"))
+    {
+        @if (Model.Status != "Borrowed")
+        {
+            <form asp-action="BorrowBook" asp-route-bookId="@Model.BookId" method="post" style="display:inline;">
+                <button type="submit" class="btn btn-success">Borrow</button>
+            </form>
+        }
+    }
+    @if (User.IsInRole("Admin"))
+    {
+        <a asp-action="Edit" asp-route-id="@Model.BookId" class="btn btn-warning">Edit</a>
+        <form asp-action="Delete" asp-route-id="@Model.BookId" method="post" style="display:inline;">
+            <button type="submit" class="btn btn-danger">Delete</button>
+        </form>
+    }
 </div>

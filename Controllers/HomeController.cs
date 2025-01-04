@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using projekt.Models;
 using System.Linq;
+using Microsoft.AspNetCore.Authorization;
 
 namespace projekt.Controllers
 {
@@ -10,7 +11,7 @@ namespace projekt.Controllers
         private readonly ILogger<HomeController> _logger;
         private readonly LibraryContext _context;
 
-        // Konstruktor przyjmujący obie zależności
+        // Konstruktor przyjmuj¹cy obie zale¿noœci
         public HomeController(ILogger<HomeController> logger, LibraryContext context)
         {
             _logger = logger;
@@ -19,11 +20,17 @@ namespace projekt.Controllers
 
         public IActionResult TestDatabaseConnection()
         {
-            // Pobierz książki z bazy danych
+            // Pobierz ksi¹¿ki z bazy danych
             var books = _context.Books.ToList();
 
-            // Wyświetl dane w widoku lub zwróć jako JSON dla testów
+            // Wyœwietl dane w widoku lub zwróæ jako JSON dla testów
             return Json(books);
+        }
+
+        [Authorize(Roles = "Administrator")]
+        public IActionResult AdminPanel()
+        {
+            return View();
         }
 
         public IActionResult Index()
@@ -43,3 +50,4 @@ namespace projekt.Controllers
         }
     }
 }
+

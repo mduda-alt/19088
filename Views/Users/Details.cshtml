@@ -1,0 +1,36 @@
+﻿@model projekt.Models.ApplicationUser
+
+<h2>Szczegóły użytkownika</h2>
+
+<div class="form-group">
+    <label><strong>Id:</strong></label>
+    <p>@Model.Id</p>
+</div>
+<div class="form-group">
+    <label><strong>First Name:</strong></label>
+    <p>@Model.FirstName</p>
+</div>
+<div class="form-group">
+    <label><strong>Last Name:</strong></label>
+    <p>@Model.LastName</p>
+</div>
+<div class="form-group">
+    <label><strong>Email:</strong></label>
+    <p>@Model.Email</p>
+</div>
+<div class="form-group">
+    <label><strong>Username:</strong></label>
+    <p>@Model.UserName</p>
+</div>
+<div class="form-group">
+    <label><strong>Email Confirmed:</strong></label>
+    <p>@(Model.EmailConfirmed ? "Yes" : "No")</p>
+</div>
+<div class="form-group">
+    <label><strong>Role:</strong></label>
+    <p>@Model.Role</p> <!-- Role pobrana z właściwości ApplicationUser -->
+</div>
+
+<a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Edit</a>
+<a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-primary">Delete</a>
+<a asp-action="Index" class="btn btn-secondary">Back to list</a>
