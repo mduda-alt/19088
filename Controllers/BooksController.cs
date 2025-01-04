@@ -1,7 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -9,16 +10,20 @@ using projekt.Models;
 
 namespace projekt.Controllers
 {
+    [Authorize]
     public class BooksController : Controller
     {
         private readonly LibraryContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public BooksController(LibraryContext context)
+        public BooksController(LibraryContext context, UserManager<ApplicationUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // GET: Books
+        [AllowAnonymous]
         public async Task<IActionResult> Index()
         {
             var libraryContext = _context.Books.Include(b => b.Category);
@@ -26,6 +31,7 @@ namespace projekt.Controllers
         }
 
         // GET: Books/Details/5
+        [AllowAnonymous]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -47,13 +53,11 @@ namespace projekt.Controllers
         // GET: Books/Create
         public IActionResult Create()
         {
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "CategoryId", "CategoryId");
+            ViewBag.Categories = new SelectList(_context.Categories, "CategoryId", "Name");
             return View();
         }
 
         // POST: Books/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("BookId,Title,Author,ISBN,PublishedDate,Status,CategoryId")] Book book)
@@ -64,7 +68,7 @@ namespace projekt.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "CategoryId", "CategoryId", book.CategoryId);
+            ViewData["CategoryId"] = new SelectList(_context.Categories, "CategoryId", "Name", book.CategoryId);
             return View(book);
         }
 
@@ -81,13 +85,11 @@ namespace projekt.Controllers
             {
                 return NotFound();
             }
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "CategoryId", "CategoryId", book.CategoryId);
+            ViewData["CategoryId"] = new SelectList(_context.Categories, "CategoryId", "Name", book.CategoryId);
             return View(book);
         }
 
         // POST: Books/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("BookId,Title,Author,ISBN,PublishedDate,Status,CategoryId")] Book book)
@@ -117,7 +119,7 @@ namespace projekt.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "CategoryId", "CategoryId", book.CategoryId);
+            ViewData["CategoryId"] = new SelectList(_context.Categories, "CategoryId", "Name", book.CategoryId);
             return View(book);
         }
 
@@ -158,6 +160,34 @@ namespace projekt.Controllers
         private bool BookExists(int id)
         {
             return _context.Books.Any(e => e.BookId == id);
+        }
+
+        // POST: Books/BorrowBook
+        [HttpPost]
+        public async Task<IActionResult> BorrowBook(int bookId)
+        {
+            var book = await _context.Books.FindAsync(bookId);
+            if (book == null || book.Status == "Wypożyczona")
+            {
+                return BadRequest("Książka jest już wypożyczona lub nie istnieje.");
+            }
+
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return Unauthorized("Użytkownik nie jest zalogowany.");
+            }
+
+            book.Status = "Wypożyczona";
+            _context.Borrows.Add(new Borrow
+            {
+                BookId = bookId,
+                UserId = user.Id,
+                BorrowDate = DateTime.Now
+            });
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Index");
         }
     }
 }

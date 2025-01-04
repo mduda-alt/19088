@@ -1,12 +1,25 @@
-﻿using Microsoft.EntityFrameworkCore;
-using projekt.Models;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 
-public class LibraryContext : DbContext
+namespace projekt.Models
 {
-    public LibraryContext(DbContextOptions<LibraryContext> options) : base(options) { }
+    public class LibraryContext : IdentityDbContext<ApplicationUser>
+    {
+        public LibraryContext(DbContextOptions<LibraryContext> options) : base(options) { }
 
-    public DbSet<Book> Books { get; set; }
-    public DbSet<User> Users { get; set; }
-    public DbSet<Borrow> Borrows { get; set; }
-    public DbSet<Category> Categories { get; set; }
+        public DbSet<Book> Books { get; set; }
+        public DbSet<Borrow> Borrows { get; set; }
+        public DbSet<Category> Categories { get; set; }
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<Borrow>()
+                .HasOne(b => b.User)
+                .WithMany()
+                .HasForeignKey(b => b.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+        }
+
+    }
 }

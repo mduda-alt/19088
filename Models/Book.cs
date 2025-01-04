@@ -1,8 +1,13 @@
-﻿namespace projekt.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace projekt.Models
 {
     public class Book
     {
         public int BookId { get; set; }
+
+        [Required]
+        [StringLength(100)]
         public string Title { get; set; }
         public string Author { get; set; }
         public string ISBN { get; set; }
@@ -10,6 +15,7 @@
         public string Status { get; set; } // "Dostępna" lub "Wypożyczona"
         public int CategoryId { get; set; }
         public Category Category { get; set; } // Relacja z kategorią
+
     }
 
 }
