@@ -24,38 +24,11 @@
         </dd>
     </dl>
 </div>
-
-<h3>Books in this Category</h3>
-@if (Model.Books != null && Model.Books.Any())
-{
-    <table class="table table-bordered">
-        <thead>
-            <tr>
-                <th>Title</th>
-                <th>Author</th>
-                <th>Details</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var book in Model.Books)
-            {
-                <tr>
-                    <td>@book.Title</td>
-                    <td>@book.Author</td>
-                    <td>
-                        <a asp-controller="Books" asp-action="Details" asp-route-id="@book.BookId" class="btn btn-info">Details</a>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
-else
-{
-    <p>No books available in this category.</p>
-}
-
 <div>
-    <a asp-action="Edit" asp-route-id="@Model?.CategoryId">Edit</a> |
+    @if (User.IsInRole("Admin"))
+    {
+        <a asp-action="Edit" asp-route-id="@Model?.CategoryId">Edit</a>
+        <a asp-action="Delete" asp-route-id="@Model?.CategoryId">Delete</a>
+    }
     <a asp-action="Index">Back to List</a>
 </div>

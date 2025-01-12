@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -82,40 +81,11 @@ namespace projekt.Controllers
         {
             if (ModelState.IsValid)
             {
-                try
-                {
-                    _context.Add(book);
-                    await _context.SaveChangesAsync();
-                    TempData["Success"] = "The book was added.";
-                    return RedirectToAction(nameof(Index));
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!BookExists(book.BookId))
-                    {
-                        return NotFound(); // Jeśli książka nie istnieje, zwróć błąd 404
-                    }
-                    else
-                    {
-                        throw; // Jeśli inny błąd, rzuć wyjątek
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error: {ex.Message}");
-                    ModelState.AddModelError("", "An error occurred while adding new book.");
-                }
+                _context.Add(book);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
             }
-            else
-            {
-                // Loguj błędy walidacji, jeśli model jest nieprawidłowy
-                foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
-                {
-                    Console.WriteLine($"Błąd walidacji: {error.ErrorMessage}");
-                }
-            }
-
-            ViewBag.Categories = new SelectList(_context.Categories, "CategoryId", "Name", book.CategoryId);
+            ViewData["CategoryId"] = new SelectList(_context.Categories, "CategoryId", "CategoryId", book.CategoryId);
             return View(book);
         }
 
@@ -134,8 +104,7 @@ namespace projekt.Controllers
             {
                 return NotFound();
             }
-
-            ViewBag.Categories = new SelectList(_context.Categories, "CategoryId", "Name", book.CategoryId);
+            ViewData["CategoryId"] = new SelectList(_context.Categories, "CategoryId", "CategoryId", book.CategoryId);
             return View(book);
         }
 
@@ -170,14 +139,9 @@ namespace projekt.Controllers
                         throw;
                     }
                 }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error: {ex.Message}");
-                    ModelState.AddModelError("", "An error occurred while updating the book.");
-                }
+                return RedirectToAction(nameof(Index));
             }
-
-            ViewBag.Categories = new SelectList(_context.Categories, "CategoryId", "Name", book.CategoryId);
+            ViewData["CategoryId"] = new SelectList(_context.Categories, "CategoryId", "CategoryId", book.CategoryId);
             return View(book);
         }
 
@@ -220,38 +184,6 @@ namespace projekt.Controllers
         private bool BookExists(int id)
         {
             return _context.Books.Any(e => e.BookId == id);
-        }
-
-        [Authorize(Roles = "Reader,Admin")]
-        // POST: Books/BorrowBook
-        [HttpPost]
-        public async Task<IActionResult> BorrowBook(int bookId)
-        {
-            var book = await _context.Books.FindAsync(bookId);
-            if (book == null || book.Status == "Borrowed")
-            {
-                return BadRequest("Książka jest już wypożyczona lub nie istnieje.");
-            }
-
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null)
-            {
-                return Unauthorized("Użytkownik nie jest zalogowany.");
-            }
-
-            book.Status = "Borrowed";
-            _context.Borrows.Add(new Borrow
-            {
-                BookId = bookId,
-                UserId = user.Id,
-                BorrowDate = DateTime.Now
-            });
-            await _context.SaveChangesAsync();
-
-            // Komunikat
-            TempData["Success"] = $"The book \"{book.Title}\" was reserved and will be waiting for you in the library for the next 5 days.";
-
-            return RedirectToAction("Index");
         }
     }
 }
