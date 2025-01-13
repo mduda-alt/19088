@@ -185,5 +185,54 @@ namespace projekt.Controllers
         {
             return _context.Books.Any(e => e.BookId == id);
         }
+
+        [HttpPost]
+        [Authorize(Roles = "Reader,Admin")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> BorrowBook(int bookId)
+        {
+            var book = await _context.Books.FindAsync(bookId);
+
+            // Sprawdź, czy książka istnieje i jest dostępna do wypożyczenia
+            if (book == null || book.Status == "Borrowed")
+            {
+                TempData["Error"] = "Book is not available for borrowing.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            // Pobierz aktualnie zalogowanego użytkownika
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                TempData["Error"] = "You must be logged in to borrow a book.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            // Zmień status książki na "Borrowed"
+            book.Status = "Borrowed";
+
+            // Dodaj informację o wypożyczeniu
+            var borrow = new Borrow
+            {
+                BookId = bookId,
+                UserId = user.Id,
+                BorrowDate = DateTime.Now
+            };
+
+            _context.Borrows.Add(borrow);
+
+            try
+            {
+                await _context.SaveChangesAsync();
+                TempData["Success"] = "Book has been successfully borrowed.";
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "An error occurred while borrowing the book.";
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
     }
 }

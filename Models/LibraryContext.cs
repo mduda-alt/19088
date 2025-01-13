@@ -45,7 +45,7 @@ namespace projekt.Models
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder
-                .UseSqlServer("Server=DESKTOP-G91Q4RK;Database=LibrarySystem;Trusted_Connection=True;Encrypt=False")
+                .UseSqlServer("Server=localhost;Database=LibrarySystem;Trusted_Connection=True;Encrypt=False")
                 .EnableSensitiveDataLogging() // Dla debugowania
                 .LogTo(Console.WriteLine);   // Log zapytań do konsoli
         }

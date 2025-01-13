@@ -3,3 +3,19 @@
 ################################################################################
 
 .vs/
+
+# Build artifacts
+bin/
+obj/
+*.dll
+*.exe
+*.pdb
+*.cache
+*.json
+
+# User-specific files
+*.user
+*.suo
+
+# Logs
+*.log
